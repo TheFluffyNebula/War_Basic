@@ -66,8 +66,8 @@ function cleanBeforeRound() {
 function flipCards() {
     inRound = true
 
-    const playerCard = playerDeck.pop()
-    const computerCard = computerDeck.pop()
+    let playerCard = playerDeck.pop()
+    let computerCard = computerDeck.pop()
 
     playerCardSlot.appendChild(playerCard.getHTML())
     computerCardSlot.appendChild(computerCard.getHTML())
@@ -82,10 +82,25 @@ function flipCards() {
         text.innerHTML = 'Lose'
         computerDeck.push(playerCard)
         computerDeck.push(computerCard)
-    } else { // EDIT THIS LATER FOR FUN (1 2 3 FLIP)
-        text.innerHTML = 'Draw'
-        playerDeck.push(playerCard)
-        computerDeck.push(computerCard)
+    } else {
+        text.innerHTML = 'Draw, 123 flip'
+        // original: both get cards back (neither side can actually win here)
+        // playerDeck.push(playerCard)
+        // computerDeck.push(computerCard)
+        
+        // remember, playerCard and computerCard are still here to be added back afterward
+        let playerWin = true // indicate which of playerCard & computerCard go back
+        if (!isGameOver(playerDeck) && !isGameOver(computerDeck)) {
+            war()
+            if (playerWin) {
+                playerDeck.push(playerCard)
+                playerDeck.push(computerCard)
+            } else {
+                computerDeck.push(playerCard)
+                computerDeck.push(computerCard)
+            }
+        }
+        // if no war that meant someone didn't have enough cards and loses
     }
     // note for here: the way this is programmed helps keep track of the game state
     // and hands things off to functions to check, etc. 
@@ -96,6 +111,61 @@ function flipCards() {
     } else if (isGameOver(computerDeck)) {
         text.innerText = 'You win!'
         stop = true
+    }
+}
+
+function war() {
+    let cards = []
+    let go = true
+    while (go) {
+        // await sleep(3000) // going to try setTimeout instead
+        // nope, doesn't do what i want it to :/
+        // setTimeout(() => {
+        //     console.log("War!")
+        //   }, 1000);
+        // both players have enough cards, 1 2 3 flip
+        for (let i = 0; i < 3; i ++) {
+            cards.push(playerDeck.pop())
+            if (isGameOver(playerDeck)) {
+                text.innerText = 'You Lose!'
+                playerWin = false
+                return
+            }
+            cards.push(computerDeck.pop())
+            if (isGameOver(computerDeck)) {
+                text.innerText = 'You win!'
+                return
+            }
+        }
+        console.log(cards)
+        let pWarCard = playerDeck.pop()
+        let cWarCard = computerDeck.pop()
+        // reveal the cards
+        playerCardSlot.appendChild(pWarCard.getHTML())
+        computerCardSlot.appendChild(cWarCard.getHTML())
+        updateDeckCount()
+        if (!isRoundWinner(pWarCard, cWarCard) && !isRoundWinner(cWarCard, pWarCard)) {
+            // war continues
+            cards.push(pWarCard, cWarCard)
+        } else if (isRoundWinner(pWarCard, cWarCard)) {
+            // player wins
+            text.innerHTML = 'Win'
+            playerDeck.push(pWarCard)
+            playerDeck.push(cWarCard)
+            for (let i = 0; i < cards.length; i++) {
+                playerDeck.push(cards[i])
+            }
+            return
+        } else {
+            // computer wins
+            text.innerHTML = 'Loss'
+            computerDeck.push(pWarCard)
+            computerDeck.push(cWarCard)
+            for (let i = 0; i < cards.length; i++) {
+                computerDeck.push(cards[i])
+            }
+            return
+        }
     }
 }
 
