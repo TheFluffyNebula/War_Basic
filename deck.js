@@ -11,6 +11,14 @@ export default class Deck { // represents any pile of cards
         return this.cards.length
     }
 
+    pop() { // shift = popleft
+        return this.cards.shift()
+    }
+
+    push(card) { // push = append
+        this.cards.push(card)
+    }
+
     shuffle() {
         for (let i = this.numberOfCards - 1; i > 0; i--) {
             const newIndex = Math.floor(Math.random() * (i + 1))
